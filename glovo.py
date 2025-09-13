@@ -1,4 +1,5 @@
 from fitter import Fitter
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -30,39 +31,80 @@ def assign_zone(city):
         return "Rural"
     else:
         return "Unknown"
-# Asignar zona a cada fila en el DataFrame
+
+
+
 glovo_datos["zone"] = glovo_datos["area"].apply(assign_zone)
 
 
-# fdp de distancias de los 3 tipos de zonas ---> Habria que dividir por zonas  
-fdp = Fitter(glovo_datos['distance_km'])
+glovo_datos["order_date"] = pd.to_datetime(glovo_datos["order_date"])
+
+glovo_datos["weekday"] = glovo_datos["order_date"].dt.weekday
+
+glovo_datos["workday"] = glovo_datos["weekday"].apply(lambda x: "Hábil" if x < 5 else "No hábil")
 
 
-for zona in ["Urbana", "Semiurbana", "Rural"]:
-    datos_zona = glovo_datos[glovo_datos["zone"] == zona]["distance_km"].dropna()
-    if not datos_zona.empty:
-        print(f"\nFDP para zona: {zona}")
-        fdp = Fitter(datos_zona)
-        fdp.fit()
-        fdp.summary()
+datos_habiles = glovo_datos[glovo_datos["workday"] == "Hábil"]
+datos_nohabiles = glovo_datos[glovo_datos["workday"] == "No hábil"]
 
 
+habiles_urbana = datos_habiles[datos_habiles["zone"] == "Urbana"]
+habiles_semiurbana = datos_habiles[datos_habiles["zone"] == "Semiurbana"]
+habiles_rural = datos_habiles[datos_habiles["zone"] == "Rural"]
 
-#fdp = intervalo entre arribos
+nohabiles_urbana = datos_nohabiles[datos_nohabiles["zone"] == "Urbana"]
+nohabiles_semiurbana = datos_nohabiles[datos_nohabiles["zone"] == "Semiurbana"]
+nohabiles_rural = datos_nohabiles[datos_nohabiles["zone"] == "Rural"]
 
-for zona in ["Urbana", "Semiurbana", "Rural"]:
-    datos_zona = glovo_datos[glovo_datos["zone"] == zona].copy()
-    if not datos_zona.empty:
-        # Asegúrate de que la columna de tiempo sea tipo datetime
-        datos_zona["order_date"] = pd.to_datetime(datos_zona["order_date"])
-        # Ordena por tiempo
-        datos_zona = datos_zona.sort_values("order_date")
-        # Calcula la diferencia entre pedidos consecutivos
-        intervalos = datos_zona["order_date"].diff().dropna().dt.total_seconds() / 60  # en minutos
-        print(f"\nIntervalos entre arribos para zona: {zona}")
+# Intervalo entre arribos - IA
+for zona, df in [("Urbana", habiles_urbana), ("Semiurbana", habiles_semiurbana), ("Rural", habiles_rural)]:
+    if not df.empty:
+        df = df.sort_values("order_date")
+        intervalos = df["order_date"].diff().dropna().dt.total_seconds() / 60  # minutos
+        print(f"\nIntervalos entre arribos en días hábiles para zona {zona}:")
+        print(intervalos.describe())
+        if not intervalos.empty:
+            fdp_ia = Fitter(intervalos)
+            fdp_ia.fit()
+            fdp_ia.summary(10)
 
+# Distancia de entregas - DE
+for zona, df in [("Urbana", habiles_urbana), ("Semiurbana", habiles_semiurbana), ("Rural", habiles_rural)]:
+    if not df.empty and "distance_km" in df.columns:
+        distancias = df["distance_km"].dropna()
+        print(f"\nFDP de distancia en días hábiles para zona {zona}:")
+        print(distancias.describe())
+        if not distancias.empty:
+            fdp_dist = Fitter(distancias)
+            fdp_dist.fit()
+            fdp_dist.summary(10)
+            fdp_dist.plot()        # Gráfico de ajuste
+            plt.title(f"FDP de distancia - zona {zona}")
+            plt.show()
 
-#fdp = tiempo de entrega --> minuto/distancia (? 
+# VELOCIDAD/CONDUCTOR - VC            
+'''
+for zona, df in [("Urbana", habiles_urbana), ("Semiurbana", habiles_semiurbana), ("Rural", habiles_rural)]:
+    if not df.empty and {"order_date", "actual_delivery_time", "distance_km"}.issubset(df.columns):
+        # Convertir columnas de tiempo a datetime
+        df = df.copy()
+        df["order_date"] = pd.to_datetime(df["order_date"])
+        df["actual_delivery_time"] = pd.to_datetime(df["actual_delivery_time"])
+        # Calcular minutos/km
+        tiempo_min = (df["actual_delivery_time"] - df["order_date"]).dt.total_seconds() / 60
+        minutos_por_km = tiempo_min / df["distance_km"]
+        minutos_por_km = minutos_por_km.replace([np.inf, -np.inf], np.nan).dropna()
+        print(f"\nFDP de minutos/km en días hábiles para zona {zona}:")
+        print(minutos_por_km.describe())
+        if not minutos_por_km.empty:
+            fdp_vel = Fitter(minutos_por_km)
+            fdp_vel.fit()
+            fdp_vel.summary(10)
+            fdp_vel.plot()
+            plt.title(f"FDP minutos/km - zona {zona}")
+            plt.show()
+'''
 
+#TE = ACTUAL_DELIVERY_TIME - ORDER_DATE)
 
 
