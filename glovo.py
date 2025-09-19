@@ -88,15 +88,6 @@ def arrepentimiento():
     else:
         return
     
-def calcular_tiempo_entrega(DE):
-    global TEntrega
-    if(DE <= 5):
-        TEntrega = obtener_TE0()  
-    elif(DE <= 10):
-        TEntrega = obtener_TE5()
-    else:
-        TEntrega = obtener_TE10()
-
 
 def calificar_servicio():
     global V, TVE
@@ -129,17 +120,9 @@ def calcular_IP():
     #TODO
     return 5
 
-def obtener_TE0():
+def obtener_TE():
     #TODO
     return 3
-
-def obtener_TE5():
-    #TODO
-    return 4
-
-def obtener_TE10():
-    #TODO
-    return 5
 
 def obtener_PP():
     #TODO
