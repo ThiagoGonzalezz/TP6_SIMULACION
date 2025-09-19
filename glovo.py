@@ -152,3 +152,17 @@ def calcular_resultados():
     PCD = (SD/CT) * 100
 
     PCR = (CR/CT) * 100
+
+
+def imprimir_resultados():
+    #VARIABLES DE CONTROL
+    print(f"Cantidad de repartidores: {N:.2f}")
+    print(f"Intervalo de tiempo entre descuentos: {ITD:.2f}")
+
+    #RESULTADOS
+    print(f"Porcentaje de entregas realizadas a tiempo: {PER:.2f}")
+    print(f"Porcentaje de tiempo ocioso: {PTO:.2f}%")
+    print(f"Promedio de satisfaccion del usuario: {PSU:.2f}")
+    print(f"Porcentaje de usuarios arrepentidos: {PUA:.2f}%")
+    print(f"Porcentaje de conductores disponibles: {PCD:.2f}%")
+    print(f"Porcentaje de conductores rechazados: {PCR:.2f}%")
