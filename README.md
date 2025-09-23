@@ -1,4 +1,4 @@
-# Simulación de Políticas de Descuento y Gestión de Repartidores para Glovo India
+# Gestión Óptima de Políticas de Descuento y Repartidores para Maximizar la Rentabilidad del Negocio y la Satisfacción del Usuario
 
 Este repositorio contiene el desarrollo del Trabajo Práctico Nº6 de la materia **Simulación** (UTN FRBA), enfocado en la gestión óptima de políticas de descuento y repartidores para maximizar la rentabilidad y la satisfacción del usuario en la empresa Glovo, utilizando un dataset real de India.
 
