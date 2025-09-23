@@ -127,7 +127,7 @@ def calificar_servicio(tc):
     global V, TVE, TVO, SU, SSU, DE
     calcular_velocidad_esperada()
     TVE = DE * V
-    TVO = tc - T - TEspera
+    TVO = tc - T #- TEspera
     r = np.random.rand()
     if TVO <= TVE:
         if r <= 0.8:
@@ -231,20 +231,21 @@ def simular():
             imprimir_resultados()
             break
 
+'''
 N=1500
 ITD = 20
 condiciones_iniciales(t = 0, tf = 3600 * 12 * 30)  # 20 dias
 simular()
 
-
 '''
+
 
 mejor_ganancia = -float('inf')
 mejor_N = 0
 mejor_ITD = 0
 
-for N_test in range(100, 1001, 100):          # probando de 100 a 1000 repartidores
-    for ITD_test in range(5, 61, 5):  # probando ITD de 5 a 100
+for N_test in range(2000, 4001, 500):          # probando de 100 a 1000 repartidores
+    for ITD_test in range(5, 61, 10):  # probando ITD de 5 a 100
         N = N_test
         ITD = ITD_test
         condiciones_iniciales(t=0, tf=3600*12*30)
@@ -255,9 +256,8 @@ for N_test in range(100, 1001, 100):          # probando de 100 a 1000 repartido
             mejor_ITD = ITD_test
 
 print(f"Mejor ganancia: {mejor_ganancia}, con N={mejor_N}, ITD={mejor_ITD}")
-'''
 
 #
 #
 #
-#
+# Agregar a paper: maximo 6 descuentos (30%), sueldo repartidores, 5% de ganancia por pedido
