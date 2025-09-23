@@ -16,15 +16,7 @@ La simulación se realiza evento a evento, considerando el tiempo comprometido d
 ## Estructura del Repositorio
 
 - **FDPS/**  
-  Resultados del ajuste de funciones de densidad de probabilidad (fdp) para los modelos de simulación:
-  - `DE/`  
-    - `exponweib.txt`: Parámetros de la mejor distribución ajustada para la distancia de entrega.
-    - `exponweib.jpg`: Gráfico de la fdp ajustada.
-    - `histograma.jpg`: Histograma de distancias de entrega.
-  - `IP/`
-    - `weibull_min`: Parámetros de la mejor distribución ajustada para el intervalo entre pedidos.
-    - `weibull_min.jpg`: Gráfico de la fdp ajustada.
-    - `histograma.jpg`: Histograma de intervalos entre pedidos.
+  Resultados del ajuste de funciones de densidad de probabilidad (fdp) para los modelos de simulación.
 
 - **Presentación**  
   Archivo con la exposición utilizada para la defensa del trabajo.
@@ -62,14 +54,6 @@ La simulación se realiza evento a evento, considerando el tiempo comprometido d
    Optimización con feedback por tiempo de espera y entrega.
 4. **Maximización Dual:**  
    Estrategias que buscan simultáneamente la mejor experiencia y la mayor rentabilidad.
-
-## Archivos Clave
-
-- `FDPS/DE/exponweib.txt`, `.jpg`, `FDPS/IP/weibull_min`, `.jpg`, `histograma.jpg`: Ajuste y visualización de distribuciones.
-- `TP 6 - Análisis Previo (1).txt`: Estructura y variables del modelo.
-- `formato_papers_estudiantes (3).txt`: Normas para la redacción del paper.
-- `PAPER_EXAMPLE.txt`: Ejemplo de trabajo final.
-- **Presentación.pdf / Diagrama.png:** Material gráfico para explicación y defensa.
 
 ## Cómo usar este repositorio
 
