@@ -222,7 +222,7 @@ def simular():
 
         if arrepentido==False:
             IT += PF*0.05
-            GN += PF
+            GN += PF*0.05
             calificar_servicio(TC[idx_TC])
 
         if T > TF:
