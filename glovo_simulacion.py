@@ -148,12 +148,10 @@ def calificar_servicio(tc):
 
 
 def calcular_resultados():
-    global PER, PTO, PSU, PUA, PCD, PCR, NT, STE, SD, CR, CT
+    global PER, PSU, PUA, PCD, PCR, NT, STE, SD, CR, CT
     
 
     PER = STE // (NT - NA) if NT > 0 else 0
-    PTO = (STO / T) * 100 if T > 0 else 0
-    #PSU = SSU / (NT - NA) if (NT - NA) > 0 else 0
     PSU = SSU / (NT) if (NT) > 0 else 0
     PUA = (NA / NT) * 100 if NT > 0 else 0
     PCD = (SD / CT) * 100 if CT > 0 else 0
@@ -165,7 +163,6 @@ def imprimir_resultados():
     print(f"Cantidad de repartidores: {N:.2f}")
     print(f"Intervalo de tiempo entre descuentos: {ITD:.2f}")
     print(f"Promedio de espera hasta que un pedido sea atendido por un repartidor: {PER:.2f}")
-    print(f"Porcentaje de tiempo ocioso: {PTO:.2f}%")
     print(f"Promedio de satisfaccion del usuario: {PSU:.2f}")
     print(f"Porcentaje de usuarios arrepentidos: {PUA:.2f}%")
     print(f"Porcentaje de costos destinados a descuentos: {PCD:.2f}%")
@@ -210,7 +207,6 @@ def simular():
 
         menorTC = TC[idx_TC]
         if T >= menorTC:
-            STO += T - TC[idx_TC]
             TEspera = 0
             TC[idx_TC] = T + TEntrega
             PF = PP
