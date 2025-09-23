@@ -41,11 +41,10 @@ def condiciones_iniciales(t, tf):
     STO = 0
     PER = PTO = PSU = PUA = GN = PCD = PCR = 0
 
-
 def getIP():
-    c = 1.002167470034177
-    loc = -2.2262196250160577e-05
-    scale = 31.56440023360133
+    c = 3.274918273645872918273 
+    loc = -0.000012345678901234567 
+    scale = 1.532849275019283746
     R = random.uniform(0, 1)
     intervalo = weibull_min.ppf(R, c, loc=loc, scale=scale)
     return max(0, math.ceil(intervalo))
@@ -72,13 +71,13 @@ def getDE():
 
 
 def getTEntrega():
-    s = 10.147654780109296
+    a = 0.9712502130246116
+    b = 0.9816062509561512
     loc = 9.999999999999998
-    scale = 0.18864986051840427
+    scale = 10.98333420209909
     R = random.uniform(0, 1)
-    intervalo = lognorm.ppf(R, s, loc=loc, scale=scale)
+    intervalo = beta.ppf(R, a, b, loc=loc, scale=scale)
     return max(0, math.ceil(intervalo))
-
 
 def buscar_menor_tiempo_comprometido():
     global TC, N
@@ -95,25 +94,30 @@ def calcular_velocidad_esperada():
     global V
     r = np.random.rand()
     if r <= 0.6:
-        V = 35
+        V = 10
     elif r <= 0.85:
-        V = 50
+        V = 15
     else:
-        V = 35
+        V = 20
 
 
 def arrepentimiento():
-    global TU, TEspera, DD, SD, Desc, NA
+    global TU, TEspera, DD, Desc, NA
     r = np.random.rand()
     if r <= 0.7:
-        TU = 20
+        TU = 6
     elif r <= 0.9:
-        TU = 10
+        TU = 3
     else:
-        TU = 5
+        TU = 2
 
     if TEspera > TU:
-        DD = 0.5 * (TEspera - TU)
+        try:
+            DD = 0.5 * (TEspera - TU) / 10
+            if DD > 1: 
+                DD = 1
+        except OverflowError:
+            DD = 1
         if Desc < DD:
             NA += 1
             return True #se arrepiente
@@ -124,25 +128,22 @@ def arrepentimiento():
 
 
 def calificar_servicio(tc):
-    global V, TVE, TVO, SU, SSU, DE
+    global V, TVE, TVO, SU, SSU, DE, TEspera, TEntrega
     calcular_velocidad_esperada()
-    TVE = DE * V
-    TVO = tc - T #- TEspera
-    r = np.random.rand()
-    if TVO <= TVE:
-        if r <= 0.8:
-            SU = 5
-        elif r <= 0.95:
-            SU = 4
-        else:
-            SU = 3
+    TVE = (DE / V) * 60
+    TVO = TEntrega
+    retraso = TVO - TVE
+
+    if retraso <= 7.5:
+        SU = 5
+    elif retraso <= 10:
+        SU = 4
+    elif retraso <= 12.5:
+        SU = 3
+    elif retraso <= 15:
+        SU = 2
     else:
-        if r <= 0.8:
-            SU = 2
-        elif r <= 0.9:
-            SU = 1
-        else:
-            SU = 0
+        SU = 1
     SSU += SU
 
 
@@ -150,18 +151,20 @@ def calcular_resultados():
     global PER, PTO, PSU, PUA, PCD, PCR, NT, STE, SD, CR, CT
     
 
-    PER = STE / (NT - NA) if NT > 0 else 0
+    PER = STE // (NT - NA) if NT > 0 else 0
     PTO = (STO / T) * 100 if T > 0 else 0
-    PSU = SSU / (NT - NA) if (NT - NA) > 0 else 0
+    #PSU = SSU / (NT - NA) if (NT - NA) > 0 else 0
+    PSU = SSU / (NT) if (NT) > 0 else 0
     PUA = (NA / NT) * 100 if NT > 0 else 0
     PCD = (SD / CT) * 100 if CT > 0 else 0
     PCR = (CR / CT) * 100 if CT > 0 else 0
 
 
 def imprimir_resultados():
+    MAX_PRINT = 10**6  
     print(f"Cantidad de repartidores: {N:.2f}")
     print(f"Intervalo de tiempo entre descuentos: {ITD:.2f}")
-    print(f"Porcentaje de espera hasta que un pedido sea atendido por un Repartidor: {PER:.2f}")
+    print(f"Promedio de espera hasta que un pedido sea atendido por un repartidor: {PER:.2f}")
     print(f"Porcentaje de tiempo ocioso: {PTO:.2f}%")
     print(f"Promedio de satisfaccion del usuario: {PSU:.2f}")
     print(f"Porcentaje de usuarios arrepentidos: {PUA:.2f}%")
@@ -171,7 +174,7 @@ def imprimir_resultados():
 
 
 def simular():
-    global T, TF, NT, N, ITD, TPP, TC, TEspera, STE, Desc, SD, PF, IT, GN, DE, PF, STO, SR, CR, CT
+    global T, TF, NT, N, ITD, TPP, TC, TEspera, STE, Desc, SD, PF, IT, GN, DE, PF, STO, SR, CR, CT, SSU, TEntrega
 
     if N <= 0 or ITD <= 0:
         print(f"El valor de las variables de control debe ser mayor a 0: N={N}, ITD={ITD}")
@@ -184,10 +187,10 @@ def simular():
         return
 
     STE = 0
-    SR = 1000
+    SR = 65000 #Salario Por Mes
     print(f"Inicio de simulacion: T={T}, TF={TF}")
 
-    CR = SR * N
+    CR = SR * N 
     GN -= CR
 
     while True:
@@ -205,24 +208,27 @@ def simular():
             print("No hay repartidores disponibles")
             break
 
-        if T >= TC[idx_TC]:
+        menorTC = TC[idx_TC]
+        if T >= menorTC:
             STO += T - TC[idx_TC]
             TEspera = 0
             TC[idx_TC] = T + TEntrega
             PF = PP
         else:
             TEspera = TC[idx_TC] - T
-            STE += TEspera
-            TC[idx_TC] += TEntrega
-            Desc = min(6, (TEspera // ITD)) * 0.05 * PP #máximo 6 descuentos acumulados (30%)
-            PF = max(0, PP - Desc)
+            Desc = min(5, (TEspera // ITD)) * 0.05  #máximo 6 descuentos acumulados (25%)
+            PF = max(0, PP - Desc*PP)
             arrepentido = arrepentimiento()
+            if arrepentido==True:
+                SSU += 1
             if arrepentido==False:
-                SD += Desc
+                STE += TEspera
+                TC[idx_TC] += TEntrega
+                SD = SD + Desc*PP
 
         if arrepentido==False:
-            IT += PF*0.05
-            GN += PF*0.05
+            IT += PP*0.05
+            GN += PP*0.05 - Desc*PP
             calificar_servicio(TC[idx_TC])
 
         if T > TF:
@@ -231,33 +237,8 @@ def simular():
             imprimir_resultados()
             break
 
-'''
-N=1500
-ITD = 20
-condiciones_iniciales(t = 0, tf = 3600 * 12 * 30)  # 20 dias
+
+N = 12
+ITD = 2
+condiciones_iniciales(t = 0, tf = 30 * 60 * 24)  # 10 dias
 simular()
-
-'''
-
-
-mejor_ganancia = -float('inf')
-mejor_N = 0
-mejor_ITD = 0
-
-for N_test in range(2000, 4001, 500):          # probando de 100 a 1000 repartidores
-    for ITD_test in range(5, 61, 10):  # probando ITD de 5 a 100
-        N = N_test
-        ITD = ITD_test
-        condiciones_iniciales(t=0, tf=3600*12*30)
-        simular()
-        if GN > mejor_ganancia:
-            mejor_ganancia = GN
-            mejor_N = N_test
-            mejor_ITD = ITD_test
-
-print(f"Mejor ganancia: {mejor_ganancia}, con N={mejor_N}, ITD={mejor_ITD}")
-
-#
-#
-#
-# Agregar a paper: maximo 6 descuentos (30%), sueldo repartidores, 5% de ganancia por pedido
