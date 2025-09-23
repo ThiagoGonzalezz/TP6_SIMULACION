@@ -148,10 +148,9 @@ def calificar_servicio(tc):
 
 def calcular_resultados():
     global PER, PTO, PSU, PUA, PCD, PCR, NT, STE, SD, CR, CT
-    CT = SR*N + SD
+    
 
-
-    PER = STE / (NT - NA) if NT > 0 else 0 #ste es sumatoria de tiempo de espera
+    PER = STE / (NT - NA) if NT > 0 else 0
     PTO = (STO / T) * 100 if T > 0 else 0
     PSU = SSU / (NT - NA) if (NT - NA) > 0 else 0
     PUA = (NA / NT) * 100 if NT > 0 else 0
@@ -172,7 +171,7 @@ def imprimir_resultados():
 
 
 def simular():
-    global T, TF, NT, N, ITD, TPP, TC, TEspera, STE, Desc, SD, PF, IT, GN, DE, PF, STO, SR, CR
+    global T, TF, NT, N, ITD, TPP, TC, TEspera, STE, Desc, SD, PF, IT, GN, DE, PF, STO, SR, CR, CT
 
     if N <= 0 or ITD <= 0:
         print(f"El valor de las variables de control debe ser mayor a 0: N={N}, ITD={ITD}")
@@ -215,36 +214,37 @@ def simular():
             TEspera = TC[idx_TC] - T
             STE += TEspera
             TC[idx_TC] += TEntrega
-            Desc = min(3, (TEspera // ITD)) * 0.05 * PP #máximo 3 descuentos acumulados
+            Desc = min(6, (TEspera // ITD)) * 0.05 * PP #máximo 6 descuentos acumulados (30%)
             PF = max(0, PP - Desc)
             arrepentido = arrepentimiento()
             if arrepentido==False:
                 SD += Desc
 
         if arrepentido==False:
-            IT += PP
+            IT += PF*0.05
             GN += PF
             calificar_servicio(TC[idx_TC])
 
         if T > TF:
+            CT = SR*N + SD
             calcular_resultados()
             imprimir_resultados()
             break
 
-#N=10
-#ITD = 20
-#condiciones_iniciales(t = 0, tf = 3600 * 12 * 30)  # 20 dias
-#simular()
+N=1500
+ITD = 20
+condiciones_iniciales(t = 0, tf = 3600 * 12 * 30)  # 20 dias
+simular()
 
 
-
+'''
 
 mejor_ganancia = -float('inf')
 mejor_N = 0
 mejor_ITD = 0
 
-for N_test in range(100, 1000):          # probando de 100 a 1000 repartidores
-    for ITD_test in range(5, 101, 5):  # probando ITD de 5 a 100
+for N_test in range(100, 1001, 100):          # probando de 100 a 1000 repartidores
+    for ITD_test in range(5, 61, 5):  # probando ITD de 5 a 100
         N = N_test
         ITD = ITD_test
         condiciones_iniciales(t=0, tf=3600*12*30)
@@ -255,3 +255,9 @@ for N_test in range(100, 1000):          # probando de 100 a 1000 repartidores
             mejor_ITD = ITD_test
 
 print(f"Mejor ganancia: {mejor_ganancia}, con N={mejor_N}, ITD={mejor_ITD}")
+'''
+
+#
+#
+#
+#
